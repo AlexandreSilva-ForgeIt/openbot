@@ -56,6 +56,7 @@ import { clineFreeModels } from "./cline-free-models";
 import { readCursorUsage } from "./cursor-usage";
 import { CustomAcpAgentsClient, type CustomAgentConfig, type CustomAgentSource } from "./custom-acp-agents-client";
 import { GrokAgentClient } from "./grok-client";
+import { readKimiUsage } from "./kimi-usage";
 import type { McpOAuthAuthority } from "./mcp-oauth-provider";
 import type { McpOAuthProxySettingsStore } from "./mcp-oauth-proxy";
 import type { McpDropReporter, McpEndpointSource, McpServerSource, McpToolRuntimeSource } from "./mcp-provider-shapes";
@@ -1114,6 +1115,10 @@ export const BUILT_IN_PROVIDER_DRIVERS: readonly BuiltInProviderDriver[] = [
         reportMcpDrops: context.reportMcpDrops,
         mcpToolRuntimes: context.mcpToolRuntimes,
         mcpEndpoint: context.mcpEndpoint,
+        readRateLimits: () =>
+          readKimiUsage({ ...process.env, ...context.agentEnvironment?.(process.env) }).pipe(
+            Effect.mapError((failure) => providerFailure(failure.cause)),
+          ),
         history: context.history?.("kimi"),
       }),
     createProfileClient: (cli, timeout, context) =>
